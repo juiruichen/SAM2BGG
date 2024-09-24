@@ -130,6 +130,7 @@ def show_masks(image, masks, scores, point_coords=None, box_coords=None, input_l
     img = Image.open(buf)
     return img
 
+#TODO: Load SAM2
 def SAM(image_path, coords_str):
 
     image = Image.open(image_path)
@@ -137,21 +138,29 @@ def SAM(image_path, coords_str):
     predictor.set_image(image)
 
     # Parse coordinates
-    coords = coords_str.strip('[]').split(',')
-    x = int(float(coords[0].strip()))
-    y = int(float(coords[1].strip()))
-    print(f"Type of x and y is: {type(x)}")
-    input_point = np.array([[x, y]])
-    input_label = np.array([1])
-
-    masks, scores, logits = predictor.predict(point_coords=input_point,
-                                              point_labels=input_label,
+    # coords = coords_str.strip('[]').split(',')
+    # x = int(float(coords[0].strip()))
+    # y = int(float(coords[1].strip()))
+    # print(f"Type of x and y is: {type(x)}")
+    # input_point = np.array([[x, y]])
+    # input_label = np.array([1])
+    coords_str = coords_str.strip('[]')
+    list_of_lists = []
+    for sublist in coords_str.split('], ['):
+        # Split the sublist into individual numbers and convert them to integers
+        elements = [int(x) for x in sublist.split(', ')]
+        list_of_lists.append(elements)
+    input_points = np.array(list_of_lists)
+    input_labels = np.tile(np.array([1]), len(input_points))
+    print(input_labels)
+    masks, scores, logits = predictor.predict(point_coords=input_points,
+                                              point_labels=input_labels,
                                               multimask_output=True,)
     sorted_ind = np.argsort(scores)[::-1]
     masks = masks[sorted_ind]
     scores = scores[sorted_ind]
     logits = logits[sorted_ind]
-    img = show_masks(image, masks, scores, point_coords=input_point, input_labels=input_label, borders=True)
+    img = show_masks(image, masks, scores, point_coords=input_points, input_labels=input_labels, borders=True)
 
     return img
 

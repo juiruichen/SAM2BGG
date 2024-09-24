@@ -4,12 +4,12 @@ from PIL import Image
 import numpy as np
 import os
 
-coords = None
+coords = []
 
 # Capture the coordinates when the user clicks on the image
 def get_coordinates(evt: gr.SelectData):
     global coords
-    coords = evt.index
+    coords.append(evt.index)
     print(f"Coordinates you click: {coords}")
     return str(coords)
 
@@ -37,6 +37,8 @@ if __name__=="__main__":
 
     # Create a Gradio Blocks interface
     with gr.Blocks() as demo:
+        with gr.Row():
+            gr.Markdown("<h1 style='text-align: center;'>Object Segmentation & Background Generation</h1>")
         with gr.Row():
             with gr.Column(scale=1):
                 # Upload image input field
